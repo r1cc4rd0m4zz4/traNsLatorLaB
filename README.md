@@ -3,7 +3,7 @@
 ## Descrizione
 **traNsLatorLaB** è un modello di traduzione automatica basato su Transformer, addestrato da Meta AI su un grande corpus di testo in diverse lingue. Il modello No Language Left Behind (NLLB) può tradurre da e verso molte lingue diverse, grazie alla sua architettura basata su Transformer.
 
-Il codice è scritto in Python utilizzando la libreria Transformers di Hugging Face e il framework PyTorch. Il modello è stato addestrato utilizzando tecniche di apprendimento profondo, che gli consentono di ottenere risultati di alta qualità.
+Il codice è scritto in Python utilizzando la libreria Transformer e il framework PyTorch. Il modello è stato addestrato utilizzando tecniche di apprendimento profondo, che gli consentono di ottenere risultati di alta qualità.
 
 Il repository contiene il codice sorgente del modello, nonché il notebook che consente di utilizzare il modello tramite Colaboratory. Inoltre, il repository contiene anche la documentazione del modello, che fornisce informazioni dettagliate sull'utilizzo del modello e sulla sua implementazione.
 
