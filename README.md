@@ -24,7 +24,7 @@ This Python script is designed to facilitate language translation, leveraging ad
 - `langdetect`
 - `sentencepiece`
 - `fasttext`
-- `sacremoses` (Optional)
+- `sacremoses` (optional)
 
 ### Installing
 
