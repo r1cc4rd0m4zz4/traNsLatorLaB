@@ -29,6 +29,11 @@ This Python script is designed to facilitate language translation, leveraging ad
 ### Installing
 
 1. Clone the repository to your local machine.
+
+```bash
+git clone https://github.com/r1cc4rd0m4zz4/traNsLatorLaB.git
+```
+ 
 2. Install the required Python packages using `pip`:
 
 ```bash
