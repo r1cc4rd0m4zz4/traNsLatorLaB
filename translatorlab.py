@@ -11,6 +11,8 @@ from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 import torch
 import pycountry
+import textwrap
+import shutil
 
 def get_ft_model():
     try:
@@ -176,10 +178,12 @@ def translate_text(text, target_lang, device="cpu", ft_model=None):
 
 def print_in_blocks(text, block_length=800):
     """
-    Prints the text in blocks of a specified length.
+    Prints the text in blocks that fit the terminal width.
     """
-    for i in range(0, len(text), block_length):
-        print(text[i:i+block_length])
+    terminal_size = shutil.get_terminal_size()
+    terminal_width = terminal_size.columns
+    wrapped_text = textwrap.fill(text, terminal_width)
+    print(wrapped_text)
         
 def main():
     """
