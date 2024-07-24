@@ -176,7 +176,7 @@ def translate_text(text, target_lang, device="cpu", ft_model=None):
             continue
     raise RuntimeError("Unable to load both the specific and fallback models")
 
-def print_in_blocks(text, block_length=800):
+def print_in_blocks(text):
     """
     Prints the text in blocks that fit the terminal width.
     """
