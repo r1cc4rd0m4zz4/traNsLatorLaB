@@ -51,7 +51,7 @@ pip install -r requirements.txt
 1. Run the script from the command line, optionally specifying the input text file and target language, by default the script will translate to Italian, example:
 
 ```bash
-pbpaste | python translatorlab.py [-o OUTPUT] [-l {it,en}] [txt_path] | pbcopy
+pbpaste | python translatorlab.py [-o OUTPUT] [-l {it,en}] [-m {opus,nllb,nllb-d600,nllb-d1.3,nllb-1.3,nllb-3.3}] [txt_path] | pbcopy
 ```
 
 2. For direct text input or to use the script in an interactive mode, follow the instructions provided in the script's comments or use the -h flag to access help:
@@ -71,7 +71,7 @@ Finally, the author of the code does not guarantee the security of the template 
 ## Acknowledgments
 
 - Helsinki-NLP for the translation models
-- Facebook AI for the NLLB-200 distilled model
+- Facebook AI for the NLLB-200 (distilled and non distilled) model (600M, 1.3B and 3.3B)
 - The transformers library by Hugging Face
 - The PyTorch team for providing an open-source machine learning library for Python
 - The requests library for providing a simple interface for making HTTP requests
