@@ -142,19 +142,44 @@ def convert_language_code(lang_iso639_1):
     custom_format = f"{lang_iso639_3}_Latn"
     return custom_format
 
-def translate_text(text, target_lang, device="cpu", ft_model=None):
+def translate_text(text, target_lang, device="cpu", ft_model=None, ts_model=None):
     """
     Translates the given text to the target language using a specified device and fastText model for language detection.
     """
     origin_lang = detect_language(text, ft_model)
     input_lang = convert_language_code(origin_lang)
     output_lang = convert_language_code(target_lang)
-    model_names = [
-        f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}',  # First attempt with a specific model
-        'facebook/nllb-200-distilled-600M'  # Fallback model
-    ]
+    
+    if (ts_model is  None) or (ts_model == "opus"):        
+        model_names = [
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}',  # First attempt with a specific model
+            'facebook/nllb-200-distilled-600M'  # Fallback model
+        ]
+    elif (ts_model == "nllb") or (ts_model == "nllb-d600"):
+        model_names = [
+            'facebook/nllb-200-distilled-600M',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]    
+    elif (ts_model == "nllb-d1.3"):
+        model_names = [
+            'facebook/nllb-200-distilled-1.3B',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]
+    elif (ts_model == "nllb-1.3"):
+        model_names = [
+            'facebook/nllb-200-1.3B',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]
+    elif (ts_model == "nllb-3.3"):
+        model_names = [
+            'facebook/nllb-200-3.3B',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]
+    else:
+        raise ValueError("Invalid model value. Expected 'opus', or 'nllb'.")
     for model_name in model_names:
         try:
+            #print(model_name + " model")
             if output_lang != input_lang:
                 model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
                 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -168,7 +193,11 @@ def translate_text(text, target_lang, device="cpu", ft_model=None):
                     device=device
                 )
                 output = translation_pipeline(text)
-                return output[0]['translation_text']
+                if output != text:                    
+                    return output[0]['translation_text']
+                else:
+                    #print(f"Translating from {origin_lang} to {target_lang}, text: {text}")
+                    continue
             else:
                 return text
         except Exception as e:
@@ -193,10 +222,11 @@ def main():
     parser.add_argument("txt_path", nargs='?', default=None, help="The path of the txt file from which to translate text.")
     parser.add_argument("-o", "--output", help="The path of the output text file. If not specified, the text will be printed to the terminal.")
     parser.add_argument("-l", "--lang", choices=["it", "en"], default="it", help="The text translate in: 'Italian' (default) or 'English'.")
+    parser.add_argument("-m", "--model", choices=["opus", "nllb", "nllb-d600", "nllb-d1.3", "nllb-1.3", "nllb-3.3"], default="opus", help="The translator model: 'Helsinki-NLP' (default) or 'Facebook/nllb'.")
     args = parser.parse_args()
     
     if not args.txt_path:
-        #text = "Your text here. Come ti chiamo? Je m'appelle Marie. ¿Cómo te llamas? Ich heiße Peter. ¿Y tú? Mi chiamo Giovanni. Et toi?" # Only for test text
+        #text = "Come ti chiamo? Je m'appelle Marie. ¿Cómo te llamas? Ich heiße Peter. ¿Y tú? Mi chiamo Giovanni. Et toi? He didn't want to come with me." # Only for test text
         text = sys.stdin.read()
     else:
         text = load_text(args.txt_path)              
@@ -206,14 +236,15 @@ def main():
     translated_segments = []
     for segment in segments:
         #print(segment)
-        translated_segment = translate_text(segment, args.lang, device, ft_model)
+        translated_segment = translate_text(segment, args.lang, device, ft_model, args.model)
         #print(translated_segment)
         translated_segments.append(translated_segment)
     text = ' '.join(translated_segments)
     if args.output:
         save_text(text, args.output)
     else:
-        print_in_blocks(text)
+        #print_in_blocks(text)
+        print(text)
 
 if __name__ == "__main__":
     main()
