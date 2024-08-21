@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import nltk
 from nltk.tokenize import sent_tokenize
@@ -13,6 +14,7 @@ import torch
 import pycountry
 import textwrap
 import shutil
+import time
 
 def get_ft_model():
     try:
@@ -223,6 +225,8 @@ def main():
     parser.add_argument("-o", "--output", help="The path of the output text file. If not specified, the text will be printed to the terminal.")
     parser.add_argument("-l", "--lang", choices=["it", "en"], default="it", help="The text translate in: 'Italian' (default) or 'English'.")
     parser.add_argument("-m", "--model", choices=["opus", "nllb", "nllb-d600", "nllb-d1.3", "nllb-1.3", "nllb-3.3"], default="opus", help="The translator model: 'Helsinki-NLP' (default) or 'Facebook/nllb'.")
+    parser.add_argument("-s", "--stream", action="store_true", help="Stream the translated text instead of printing it all at once.")
+    
     args = parser.parse_args()
     
     if not args.txt_path:
@@ -238,13 +242,19 @@ def main():
         #print(segment)
         translated_segment = translate_text(segment, args.lang, device, ft_model, args.model)
         #print(translated_segment)
+        if args.stream:
+            words = translated_segment.split()
+            for word in words:
+                print(word, end=' ', flush=True)
+                time.sleep(0.02) # Delay to simulate streaming
         translated_segments.append(translated_segment)
     text = ' '.join(translated_segments)
     if args.output:
         save_text(text, args.output)
     else:
-        #print_in_blocks(text)
-        print(text)
+        if not args.stream:
+            #print_in_blocks(text)
+            print(text)
 
 if __name__ == "__main__":
     main()
