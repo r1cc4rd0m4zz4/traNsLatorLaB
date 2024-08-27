@@ -184,7 +184,7 @@ def translate_text(text, target_lang, device="cpu", ft_model=None, ts_model=None
             #print(model_name + " model")
             if output_lang != input_lang:
                 model = AutoModelForSeq2SeqLM.from_pretrained(model_name).to(device)
-                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                tokenizer = AutoTokenizer.from_pretrained(model_name, legacy=False, clean_up_tokenization_spaces=True)
                 translation_pipeline = pipeline(
                     'translation',
                     model=model,
