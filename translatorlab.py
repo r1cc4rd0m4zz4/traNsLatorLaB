@@ -84,15 +84,28 @@ def split_sentences(text, max_length=512):
     get_nltk_punkt()
     sentences = sent_tokenize(text)
     short_sentences = []
+    current_sentence = ""
     for sentence in sentences:
-        while len(sentence) > max_length:
-            # Find a space near the maximum length to split the sentence
-            split_point = sentence.rfind(' ', 0, max_length)
-            if split_point == -1:  # Not found, break at the maximum limit
-                split_point = max_length
-            short_sentences.append(sentence[:split_point])
-            sentence = sentence[split_point:].lstrip()
-        short_sentences.append(sentence)
+        if len(current_sentence) + len(sentence) + 1 <= max_length:
+            if current_sentence:
+                current_sentence += " " + sentence
+            else:
+                current_sentence = sentence
+        else:
+            if current_sentence:
+                short_sentences.append(current_sentence)
+            current_sentence = sentence
+            while len(current_sentence) > max_length:
+                # Find a space or newline near the maximum length to split the sentence
+                split_point_space = current_sentence.rfind(' ', 0, max_length)
+                split_point_newline = current_sentence.rfind('\n', 0, max_length)
+                split_point = max(split_point_space, split_point_newline)
+                if split_point == -1:  # Not found, break at the maximum limit
+                    split_point = max_length
+                short_sentences.append(current_sentence[:split_point])
+                current_sentence = current_sentence[split_point:].lstrip()
+    if current_sentence:
+        short_sentences.append(current_sentence)
     return short_sentences
 
 def detect_language(text, ft_model=None):
