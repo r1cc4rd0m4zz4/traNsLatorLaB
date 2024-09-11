@@ -8,7 +8,7 @@ This Python script is designed to facilitate language translation, leveraging ad
 ## Features
 
 - **Language Detection**: Automatically detects the language of the input text using both `langdetect` and a fastText model, ensuring accurate translation.
-- **Translation**: Translates text to a specified target language using state-of-the-art models from Helsinki-NLP or Facebook's NLLB-200 distilled model, depending on availability and compatibility.
+- **Translation**: Translates text to a specified target language using state-of-the-art models from Helsinki-NLP or Facebook's M2M-100 and NLLB-200 distilled model, depending on availability and compatibility.
 - **Device Compatibility**: Automatically detects and utilizes available computational resources, preferring GPU acceleration when available for faster processing.
 - **Customizable Output**: Allows users to specify an output file for the translated text or prints the translation to the terminal if no file is specified.
 - **Sentence Splitting**: Splits input text into manageable sentences or segments to ensure the translation's quality and coherence, especially for longer texts.
@@ -24,6 +24,7 @@ This Python script is designed to facilitate language translation, leveraging ad
 - `langdetect`
 - `sentencepiece`
 - `fasttext`
+- `tiktoken`
 - `sacremoses` (optional)
 
 ### Installing
@@ -37,10 +38,6 @@ git clone https://github.com/r1cc4rd0m4zz4/traNsLatorLaB.git
 2. Install the required Python packages using `pip`:
 
 ```bash
-pip install transformers torch requests nltk pycountry langdetect fasttext sentencepiece sacremoses
-```
-or
-```bash
 pip install -r requirements.txt
 ```
 
@@ -51,7 +48,7 @@ pip install -r requirements.txt
 1. Run the script from the command line, optionally specifying the input text file and target language, by default the script will translate to Italian, example:
 
 ```bash
-pbpaste | python translatorlab.py [-o OUTPUT] [-l {it,en}] [-m {opus,nllb,nllb-d600,nllb-d1.3,nllb-1.3,nllb-3.3}] [txt_path] | pbcopy
+pbpaste | python translatorlab.py [-o OUTPUT] [-l {it,en}] [-m {opus,m2m,m2m-418,m2m-1.2,nllb,nllb-d600,nllb-1.3,nllb-d1.3,nllb-3.3}] [-s] [txt_path]
 ```
 
 2. For direct text input or to use the script in an interactive mode, follow the instructions provided in the script's comments or use the -h flag to access help:
@@ -71,7 +68,7 @@ Finally, the author of the code does not guarantee the security of the template 
 ## Acknowledgments
 
 - Helsinki-NLP for the translation models
-- Facebook AI for the NLLB-200 (distilled and non distilled) model (600M, 1.3B and 3.3B)
+- Facebook AI for the M2M-100 and NLLB-200 models
 - The transformers library by Hugging Face
 - The PyTorch team for providing an open-source machine learning library for Python
 - The requests library for providing a simple interface for making HTTP requests
@@ -81,3 +78,4 @@ Finally, the author of the code does not guarantee the security of the template 
 - The sentencepiece library for providing efficient subword tokenization
 - The fasttext library for providing fast and accurate language identification
 - The sacremoses library for providing tokenization and detokenization utilities
+- The tiktoken library for providing efficient tokenization tools

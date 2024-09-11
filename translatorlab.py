@@ -15,6 +15,8 @@ import pycountry
 import textwrap
 import shutil
 import time
+import tiktoken
+import string
 
 def get_ft_model():
     try:
@@ -83,29 +85,23 @@ def detect_language_langdetect(text):
 def split_sentences(text, max_length=512):
     get_nltk_punkt()
     sentences = sent_tokenize(text)
+    enc = tiktoken.get_encoding("gpt2")
     short_sentences = []
-    current_sentence = ""
     for sentence in sentences:
-        if len(current_sentence) + len(sentence) + 1 <= max_length:
-            if current_sentence:
-                current_sentence += " " + sentence
-            else:
-                current_sentence = sentence
-        else:
-            if current_sentence:
-                short_sentences.append(current_sentence)
-            current_sentence = sentence
-            while len(current_sentence) > max_length:
-                # Find a space or newline near the maximum length to split the sentence
-                split_point_space = current_sentence.rfind(' ', 0, max_length)
-                split_point_newline = current_sentence.rfind('\n', 0, max_length)
-                split_point = max(split_point_space, split_point_newline)
-                if split_point == -1:  # Not found, break at the maximum limit
+        tokens = enc.encode(sentence)
+        while len(tokens) > max_length:
+            current_sentence = tokens[:max_length]
+            # Ensure we don't split in the middle of a word or punctuation
+            if len(current_sentence) < len(tokens):
+                split_point = max_length
+                while split_point > 0 and not enc.decode([tokens[split_point]]).isspace():
+                    split_point -= 1
+                if split_point == 0:
                     split_point = max_length
-                short_sentences.append(current_sentence[:split_point])
-                current_sentence = current_sentence[split_point:].lstrip()
-    if current_sentence:
-        short_sentences.append(current_sentence)
+                current_sentence = tokens[:split_point]
+            short_sentences.append(enc.decode(current_sentence).strip())
+            tokens = tokens[len(current_sentence):]
+        short_sentences.append(enc.decode(tokens).strip())
     return short_sentences
 
 def detect_language(text, ft_model=None):
@@ -161,6 +157,9 @@ def translate_text(text, target_lang, device="cpu", ft_model=None, ts_model=None
     """
     Translates the given text to the target language using a specified device and fastText model for language detection.
     """
+    # Check if the text contains only punctuation symbols
+    if all(char in string.punctuation for char in text):
+        return text
     origin_lang = detect_language(text, ft_model)
     input_lang = convert_language_code(origin_lang)
     output_lang = convert_language_code(target_lang)
@@ -190,8 +189,18 @@ def translate_text(text, target_lang, device="cpu", ft_model=None, ts_model=None
             'facebook/nllb-200-3.3B',  # First attempt with a specific model
             f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
         ]
+    elif (ts_model == "m2m") or (ts_model == "m2m-418"):
+        model_names = [
+            'facebook/m2m100_418M',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]
+    elif (ts_model == "m2m-1.2"):
+        model_names = [
+            'facebook/m2m100_1.2B',  # First attempt with a specific model
+            f'Helsinki-NLP/opus-mt-{origin_lang}-{target_lang}'  # Fallback model
+        ]
     else:
-        raise ValueError("Invalid model value. Expected 'opus', or 'nllb'.")
+        raise ValueError("Invalid model value. Expected 'opus' or 'nllb' or 'm2m'.")
     for model_name in model_names:
         try:
             #print(model_name + " model")
@@ -204,7 +213,7 @@ def translate_text(text, target_lang, device="cpu", ft_model=None, ts_model=None
                     tokenizer=tokenizer,
                     src_lang=input_lang,
                     tgt_lang=output_lang,
-                    max_length=512,
+                    max_length=400,
                     device=device
                 )
                 output = translation_pipeline(text)
@@ -237,7 +246,7 @@ def main():
     parser.add_argument("txt_path", nargs='?', default=None, help="The path of the txt file from which to translate text.")
     parser.add_argument("-o", "--output", help="The path of the output text file. If not specified, the text will be printed to the terminal.")
     parser.add_argument("-l", "--lang", choices=["it", "en"], default="it", help="The text translate in: 'Italian' (default) or 'English'.")
-    parser.add_argument("-m", "--model", choices=["opus", "nllb", "nllb-d600", "nllb-d1.3", "nllb-1.3", "nllb-3.3"], default="opus", help="The translator model: 'Helsinki-NLP' (default) or 'Facebook/nllb'.")
+    parser.add_argument("-m", "--model", choices=["opus", "m2m", "m2m-418", "m2m-1.2", "nllb", "nllb-d600", "nllb-1.3", "nllb-d1.3", "nllb-3.3"], default="opus", help="The translator model: 'Helsinki-NLP' (default) or 'Facebook/m2m100' or 'Facebook/nllb'.")
     parser.add_argument("-s", "--stream", action="store_true", help="Stream the translated text instead of printing it all at once.")
     
     args = parser.parse_args()
@@ -247,7 +256,7 @@ def main():
         text = sys.stdin.read()
     else:
         text = load_text(args.txt_path)              
-    segments = split_sentences(text)
+    segments = split_sentences(text, 400)
     device = get_available_device()
     ft_model = get_ft_model()
     translated_segments = []
