@@ -1,9 +1,9 @@
 nltk==3.9
 fasttext==0.9.3
 langdetect==1.0.9
-requests==2.32.3
-torch==2.7.1
-transformers==4.50.0
+requests==2.32.4
+torch==2.6.0
+transformers==4.53.0
 pycountry==24.6.1
 sentencepiece==0.2.0
 sacremoses==0.0.53
