@@ -1,4 +1,4 @@
-nltk==3.9
+nltk==3.9.4
 fasttext==0.9.3
 langdetect==1.0.9
 requests==2.32.4
